@@ -88,8 +88,6 @@ const ChartPie = ({
           <Legend formatter={(value: number) => <span>{value}</span>} />
         </PieChart>
       </ResponsiveContainer>
-
-      {/* <pre>{JSON.stringify(transformedData, null, 2)}</pre> */}
     </>
   );
 };
