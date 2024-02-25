@@ -36,7 +36,7 @@ const ChartPie = ({
   files: File[];
 }) => {
   const [transformedData, setTransformedData] = useState<TransformedData[]>([]);
-
+  console.log("Tutoring Data:", tutoringData);
   useEffect(() => {
     const filteredData = tutoringData.filter(
       (session) => session.subject?.toLowerCase() !== "subject"
