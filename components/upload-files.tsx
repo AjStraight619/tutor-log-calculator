@@ -1,6 +1,5 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import { parse } from "@/actions/actions";
 import { ExcelTutoringSessionData } from "@/lib/types";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
@@ -11,6 +10,11 @@ type UploadFilesProps = {
   setFileData: React.Dispatch<React.SetStateAction<ExcelTutoringSessionData[]>>;
 };
 
+const baseUrl =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : "https://tutor-log-calculator.vercel.app";
+
 const UploadFiles = ({ files, setFiles, setFileData }: UploadFilesProps) => {
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -19,7 +23,11 @@ const UploadFiles = ({ files, setFiles, setFileData }: UploadFilesProps) => {
       acceptedFiles.forEach((file) => {
         formData.append("files", file);
       });
-      const fileData = await parse(formData);
+      const fileData = await fetch(`${baseUrl}/api/parse`, {
+        method: "POST",
+        body: formData,
+      }).then((res) => res.json());
+
       setFileData((prevData) => [...prevData, ...fileData]);
     },
     [setFiles, setFileData]

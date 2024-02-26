@@ -1,8 +1,9 @@
-"use server";
 import { ExcelTutoringSessionData } from "@/lib/types";
 import ExcelJS from "exceljs";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function parse(formData: FormData) {
+export async function POST(req: NextRequest) {
+  const formData = await req.formData();
   const files = formData.getAll("files") as File[];
 
   const allTutoringSessions: ExcelTutoringSessionData[] = [];
@@ -15,7 +16,7 @@ export async function parse(formData: FormData) {
       allTutoringSessions.push(...tutoringSessions);
     }
   }
-  return allTutoringSessions;
+  return NextResponse.json(allTutoringSessions);
 }
 
 async function parseExcel(
