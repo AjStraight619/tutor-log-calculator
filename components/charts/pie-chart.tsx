@@ -1,5 +1,4 @@
-import { ExcelTutoringSessionData } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { TransformedData } from "@/lib/types";
 import {
   Cell,
   Legend,
@@ -23,50 +22,14 @@ type CustomizedLabelProps = {
   payload: any;
 };
 
-type TransformedData = {
-  name: string;
-  value: number;
+type ChartPieProps = {
+  transformedData: TransformedData[];
 };
 
-const ChartPie = ({
-  tutoringData,
-  files,
-}: {
-  tutoringData: ExcelTutoringSessionData[];
-  files: File[];
-}) => {
-  const [transformedData, setTransformedData] = useState<TransformedData[]>([]);
-  console.log("Tutoring Data:", tutoringData);
-  useEffect(() => {
-    const filteredData = tutoringData.filter(
-      (session) => session.subject?.toLowerCase() !== "subject"
-    );
-
-    const processedData = filteredData.map((session) => ({
-      ...session,
-      subject: session.subject?.toLowerCase(),
-      topicsCovered: session.topicsCovered?.toLowerCase(),
-    }));
-
-    const subjectCounts = processedData.reduce((acc, session) => {
-      const { subject } = session;
-      if (subject) {
-        acc[subject] = (acc[subject] || 0) + 1;
-      }
-      return acc;
-    }, {} as Record<string, number>);
-
-    const chartData = Object.keys(subjectCounts).map((key) => ({
-      name: key,
-      value: subjectCounts[key],
-    }));
-
-    setTransformedData(chartData);
-  }, [tutoringData, files]);
-
+const ChartPie = ({ transformedData }: ChartPieProps) => {
   return (
     <>
-      <ResponsiveContainer width="100%" height={400}>
+      <ResponsiveContainer width="100%" height={300}>
         <PieChart width={400} height={400}>
           <Pie
             data={transformedData}
@@ -85,7 +48,10 @@ const ChartPie = ({
               />
             ))}
           </Pie>
-          <Legend formatter={(value: number) => <span>{value}</span>} />
+          <Legend
+            className="flex flex-row w-full gap-2"
+            formatter={(value: number) => <span>{value}</span>}
+          />
         </PieChart>
       </ResponsiveContainer>
     </>
