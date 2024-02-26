@@ -9,6 +9,7 @@ import { Button } from "./ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -59,6 +60,7 @@ const FilePreview = ({
           <Card>
             <CardHeader>
               <CardTitle className="self-center">Files To Upload</CardTitle>
+              <CardDescription>Add files and upload</CardDescription>
             </CardHeader>
 
             <CardContent className="flex flex-col items-center justify-center gap-2">
