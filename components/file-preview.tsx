@@ -58,7 +58,7 @@ const FilePreview = ({
         <form action={handleUpload}>
           <Card>
             <CardHeader>
-              <CardTitle>Files To Uploaded</CardTitle>
+              <CardTitle className="self-center">Files To Upload</CardTitle>
             </CardHeader>
 
             <CardContent className="flex flex-col items-center justify-center gap-2">
