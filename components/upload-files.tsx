@@ -1,36 +1,46 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import { ExcelTutoringSessionData } from "@/lib/types";
+import { FileData } from "@/lib/types";
 import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
+import ExcelJS from "exceljs";
+
 type UploadFilesProps = {
-  files: File[];
-  setFiles: React.Dispatch<React.SetStateAction<File[]>>;
-  setFileData: React.Dispatch<React.SetStateAction<ExcelTutoringSessionData[]>>;
+  files: FileData[];
+  setFiles: React.Dispatch<React.SetStateAction<FileData[]>>;
 };
 
-const baseUrl =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : "https://tutor-log-calculator.vercel.app";
+// const baseUrl =
+//   process.env.NODE_ENV === "development"
+//     ? "http://localhost:3000"
+//     : "https://tutor-log-calculator.vercel.app";
 
-const UploadFiles = ({ files, setFiles, setFileData }: UploadFilesProps) => {
+const UploadFiles = ({ files, setFiles }: UploadFilesProps) => {
+  const isDuplicate = useCallback(
+    (fileName: string) => {
+      return files.some((file) => file.file.name === fileName);
+    },
+    [files]
+  );
+
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
-      const formData = new FormData();
-      acceptedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-      const fileData = await fetch(`${baseUrl}/api/parse`, {
-        method: "POST",
-        body: formData,
-      }).then((res) => res.json());
+      acceptedFiles = acceptedFiles.filter((file) => !isDuplicate(file.name));
 
-      setFileData((prevData) => [...prevData, ...fileData]);
+      // Extract tutor names and create FileData objects
+      const fileDataPromises = acceptedFiles.map(async (file) => {
+        const tutorName = await extractTutorName(file);
+        console.log(tutorName);
+        console.log(typeof tutorName);
+        return { file, tutorName };
+      });
+
+      const fileDataArray = await Promise.all(fileDataPromises);
+
+      setFiles((prevFiles) => [...prevFiles, ...fileDataArray]);
     },
-    [setFiles, setFileData]
+    [setFiles, isDuplicate]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -58,3 +68,37 @@ const UploadFiles = ({ files, setFiles, setFileData }: UploadFilesProps) => {
 };
 
 export default UploadFiles;
+
+async function extractTutorName(file: File): Promise<string | undefined> {
+  return new Promise((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const arrayBuffer = event.target?.result;
+        if (arrayBuffer instanceof ArrayBuffer) {
+          const workbook = new ExcelJS.Workbook();
+          await workbook.xlsx.load(arrayBuffer);
+          const worksheet = workbook.getWorksheet(1);
+          const tutorNameCell = worksheet?.getCell("A2");
+          const tutorName = tutorNameCell?.value
+            ?.toString()
+            .split(":")[1]
+            .trim();
+          if (tutorName) {
+            resolve(tutorName);
+          } else {
+            resolve("");
+          }
+        } else {
+          console.error("Failed to load file as array buffer");
+          resolve(undefined);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error("Error reading Excel file:", error);
+      reject(error); // Reject the promise on catching an error
+    }
+  });
+}

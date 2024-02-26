@@ -1,20 +1,25 @@
-import { ExcelTutoringSessionData } from "@/lib/types";
+"use server";
+import { ExcelTutoringSessionData, FileData } from "@/lib/types";
 import { prisma } from "@/prisma/prisma";
 import ExcelJS from "exceljs";
-import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
-  const formData = await req.formData();
-  const files: File[] | null = formData.getAll("files") as unknown as File[];
+export const uploadFiles = async (formData: FormData) => {
+  const files: FileData[] | null = formData.getAll(
+    "files"
+  ) as unknown as FileData[];
+  const tutorNames = formData.getAll("tutorName") as string[];
+
   if (!files || files.length === 0) {
-    return NextResponse.json({ success: false, message: "No files found" });
+    return { success: false, message: "No files found" };
   }
 
-  const parsePromises = files.map(async (file) => {
+  console.log("tutorNames", tutorNames);
+
+  const parsePromises = files.map(async (file, index) => {
     if (file instanceof File) {
       return file.arrayBuffer().then((bytes) => {
         const buffer = Buffer.from(bytes);
-        return parseExcel(buffer, file.name);
+        return parseExcel(buffer, file.name, tutorNames[index]);
       });
     }
     return Promise.resolve([]);
@@ -25,23 +30,23 @@ export async function POST(req: NextRequest) {
     const allTutoringSessions = results.flat();
     if (allTutoringSessions.length > 0) {
       const fileName = allTutoringSessions[0].filename;
-      const tutorName = "name";
-      await saveToDatabase(allTutoringSessions, fileName, tutorName);
+      //   await saveToDatabase(allTutoringSessions, fileName);
     }
 
-    return NextResponse.json({ success: true, data: allTutoringSessions });
+    return { success: true, data: allTutoringSessions };
   } catch (error) {
-    return NextResponse.json({
+    return {
       success: false,
       message: "Error processing files",
       error: error,
-    });
+    };
   }
-}
+};
 
 async function parseExcel(
   fileBuffer: Buffer,
-  fileName: string
+  fileName: string,
+  tutorName: string
 ): Promise<ExcelTutoringSessionData[]> {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(fileBuffer);
@@ -57,6 +62,7 @@ async function parseExcel(
     const subjectCell = row.getCell(4).value;
     if (subjectCell) {
       const session: ExcelTutoringSessionData = {
+        tutorName: tutorName || "",
         filename: fileName,
         date: new Date(),
         studentName: "",
@@ -91,13 +97,12 @@ async function parseExcel(
 
 async function saveToDatabase(
   tutoringSessions: ExcelTutoringSessionData[],
-  filename: string | undefined,
-  tutorName: string
+  filename: string | undefined
 ) {
   const batch = await prisma.tutoringSessionBatch.create({
     data: {
       fileName: filename || "No file name",
-      tutorName: tutorName,
+      tutorName: tutoringSessions[0].tutorName || "No tutor name",
     },
   });
 

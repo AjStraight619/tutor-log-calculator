@@ -1,13 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTransformedData } from "@/hooks/useTransformedData";
-import { ExcelTutoringSessionData } from "@/lib/types";
+import { ExcelTutoringSessionData, FileData } from "@/lib/types";
 import { useState } from "react";
 import ChartBar from "./bar-chart";
 import ChartPie from "./pie-chart";
 
 type ChartsWrapperProps = {
   tutoringData: ExcelTutoringSessionData[];
-  files: File[];
+  files: FileData[];
 };
 
 const ChartsWrapper = ({ tutoringData, files }: ChartsWrapperProps) => {
@@ -19,7 +19,7 @@ const ChartsWrapper = ({ tutoringData, files }: ChartsWrapperProps) => {
 
   return (
     <div className="w-full flex flex-col items-center justify-center">
-      {files.length > 0 && (
+      {transformedData.length > 0 && (
         <Tabs defaultValue="Pie Chart" className="w-full space-y-6">
           <TabsList className="w-full">
             <TabsTrigger

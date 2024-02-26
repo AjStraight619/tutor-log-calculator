@@ -9,18 +9,29 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL")
+}
+
+model TutoringSessionBatch {
+  id               String            @id @default(uuid())
+  fileName         String            @unique
+  tutorName        String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  tutoringSessions TutoringSession[]
 }
 
 model TutoringSession {
-  id            String    @id @default(uuid())
+  id            String               @id @default(uuid())
+  batchId       String
   date          DateTime?
   studentName   String?
   studentId     String?
   subject       String?
   topicsCovered String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  batch         TutoringSessionBatch @relation(fields: [batchId], references: [id])
 }
