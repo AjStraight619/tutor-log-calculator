@@ -55,7 +55,7 @@ const UploadFiles = ({ files, setFiles }: UploadFilesProps) => {
   return (
     <div
       {...getRootProps()}
-      className="border p-4 border-dashed hover:cursor-pointer max-w-[28rem]"
+      className="border p-4 border-dashed hover:cursor-pointer max-w-[28rem] min-w-[20rem]"
     >
       <input {...getInputProps()} accept="xlsx" />
       {isDragActive ? (

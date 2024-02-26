@@ -57,10 +57,12 @@ const FilePreview = ({
     <>
       {files.length > 0 && (
         <form action={handleUpload}>
-          <Card>
+          <Card className="min-w-[22rem]">
             <CardHeader>
-              <CardTitle className="self-center">Files To Upload</CardTitle>
-              <CardDescription>Add files and upload</CardDescription>
+              <CardTitle className="self-center">Upload Files</CardTitle>
+              <CardDescription className="self-center">
+                Add files and upload
+              </CardDescription>
             </CardHeader>
 
             <CardContent className="flex flex-col items-center justify-center gap-2">
@@ -114,7 +116,10 @@ const FilePreview = ({
                 ))}
               </ul> */}
             </CardContent>
-            <CardFooter className="justify-end">
+            <CardFooter className="justify-between">
+              <Button variant="secondary" onClick={() => setFiles([])}>
+                Clear All
+              </Button>
               <SubmitButton>Upload Files</SubmitButton>
             </CardFooter>
           </Card>
