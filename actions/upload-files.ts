@@ -64,14 +64,14 @@ async function parseExcel(
       const session: ExcelTutoringSessionData = {
         tutorName: tutorName || "",
         filename: fileName,
-        date: new Date(),
+        date: undefined,
         studentName: "",
         studentId: "",
         subject: "",
         topicsCovered: "",
       };
 
-      const dateCell = row.getCell(1).value;
+      const dateCell = row.getCell(1).value || "N/A";
       const nameCell = row.getCell(2).value;
       const studentIdCell = row.getCell(3).value;
       const topicsCell = row.getCell(5).value || "No Specific Topic Listed";
